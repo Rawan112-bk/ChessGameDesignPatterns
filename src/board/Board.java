@@ -7,6 +7,17 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.List;
 
+
+import factory.PieceCreator;
+import factory.RookCreator;
+import factory.KnightCreator;
+import factory.BishopCreator;
+import factory.QueenCreator;
+import factory.KingCreator;
+import factory.PawnCreator;
+import piece.Piece;
+
+
 public class Board {
     private Piece[][] board;
     private JPanel[][] squares;
@@ -17,13 +28,22 @@ public class Board {
     private JLabel turnLabel;
     private JLabel statusLabel;
     private int moveCount;  // Track move number for en passant
+    
+    private static Board instance;
+    
+    private Board() {
+    board = new Piece[8][8];
+    squares = new JPanel[8][8];
+    currentTurn = "white";
+    moveCount = 0;
+}
 
-    public Board() {
-        board = new Piece[8][8];
-        squares = new JPanel[8][8];
-        currentTurn = "white";
-        moveCount = 0;
+public static synchronized Board getInstance() {
+    if (instance == null) {
+        instance = new Board();
     }
+    return instance;
+}
 
     // make this method public so King can use it
     public boolean isSquareUnderAttack(int x, int y, String kingColor) {
@@ -95,69 +115,87 @@ public class Board {
         window.setVisible(true);
     }
 
-    private void setupPieces() {
-        // BLACK pieces
-        board[0][0] = new Rook(0, 0, "black");
-        addPieceToSquare(squares[0][0], board[0][0], "♜");
+    
+private void setupPieces() {
 
-        board[0][1] = new Knight(1, 0, "black");
-        addPieceToSquare(squares[0][1], board[0][1], "♞");
+    // Create the Factory Method creators
+    PieceCreator rookCreator = new RookCreator();
+    PieceCreator knightCreator = new KnightCreator();
+    PieceCreator bishopCreator = new BishopCreator();
+    PieceCreator queenCreator = new QueenCreator();
+    PieceCreator kingCreator = new KingCreator();
+    PieceCreator pawnCreator = new PawnCreator();
 
-        board[0][2] = new Bishop(2, 0, "black");
-        addPieceToSquare(squares[0][2], board[0][2], "♝");
+    // BLACK pieces
+    board[0][0] = rookCreator.createPiece(0, 0, "black");
+    addPieceToSquare(squares[0][0], board[0][0], "♜");
 
-        board[0][3] = new Queen(3, 0, "black");
-        addPieceToSquare(squares[0][3], board[0][3], "♛");
+    board[0][1] = knightCreator.createPiece(1, 0, "black");
+    addPieceToSquare(squares[0][1], board[0][1], "♞");
 
-        board[0][4] = new King(4, 0, "black");
-        addPieceToSquare(squares[0][4], board[0][4], "♚");
+    board[0][2] = bishopCreator.createPiece(2, 0, "black");
+    addPieceToSquare(squares[0][2], board[0][2], "♝");
 
-        board[0][5] = new Bishop(5, 0, "black");
-        addPieceToSquare(squares[0][5], board[0][5], "♝");
+    board[0][3] = queenCreator.createPiece(3, 0, "black");
+    addPieceToSquare(squares[0][3], board[0][3], "♛");
 
-        board[0][6] = new Knight(6, 0, "black");
-        addPieceToSquare(squares[0][6], board[0][6], "♞");
+    board[0][4] = kingCreator.createPiece(4, 0, "black");
+    addPieceToSquare(squares[0][4], board[0][4], "♚");
 
-        board[0][7] = new Rook(7, 0, "black");
-        addPieceToSquare(squares[0][7], board[0][7], "♜");
+    board[0][5] = bishopCreator.createPiece(5, 0, "black");
+    addPieceToSquare(squares[0][5], board[0][5], "♝");
 
-        for (int col = 0; col < 8; col++) {
-            Pawn blackPawn = new Pawn(col, 1, "black");
-            board[1][col] = blackPawn;
-            addPieceToSquare(squares[1][col], blackPawn, "♟");
-        }
+    board[0][6] = knightCreator.createPiece(6, 0, "black");
+    addPieceToSquare(squares[0][6], board[0][6], "♞");
 
-        // WHITE pieces
-        for (int col = 0; col < 8; col++) {
-            Pawn whitePawn = new Pawn(col, 6, "white");
-            board[6][col] = whitePawn;
-            addPieceToSquare(squares[6][col], whitePawn, "♙");
-        }
+    board[0][7] = rookCreator.createPiece(7, 0, "black");
+    addPieceToSquare(squares[0][7], board[0][7], "♜");
 
-        board[7][0] = new Rook(0, 7, "white");
-        addPieceToSquare(squares[7][0], board[7][0], "♖");
+    // BLACK pawns
+    for (int col = 0; col < 8; col++) {
+        Piece blackPawn =
+                pawnCreator.createPiece(col, 1, "black");
 
-        board[7][1] = new Knight(1, 7, "white");
-        addPieceToSquare(squares[7][1], board[7][1], "♘");
-
-        board[7][2] = new Bishop(2, 7, "white");
-        addPieceToSquare(squares[7][2], board[7][2], "♗");
-
-        board[7][3] = new Queen(3, 7, "white");
-        addPieceToSquare(squares[7][3], board[7][3], "♕");
-
-        board[7][4] = new King(4, 7, "white");
-        addPieceToSquare(squares[7][4], board[7][4], "♔");
-
-        board[7][5] = new Bishop(5, 7, "white");
-        addPieceToSquare(squares[7][5], board[7][5], "♗");
-
-        board[7][6] = new Knight(6, 7, "white");
-        addPieceToSquare(squares[7][6], board[7][6], "♘");
-
-        board[7][7] = new Rook(7, 7, "white");
-        addPieceToSquare(squares[7][7], board[7][7], "♖");
+        board[1][col] = blackPawn;
+        addPieceToSquare(squares[1][col], blackPawn, "♟");
     }
+
+    // WHITE pawns
+    for (int col = 0; col < 8; col++) {
+        Piece whitePawn =
+                pawnCreator.createPiece(col, 6, "white");
+
+        board[6][col] = whitePawn;
+        addPieceToSquare(squares[6][col], whitePawn, "♙");
+    }
+
+    // WHITE pieces
+    board[7][0] = rookCreator.createPiece(0, 7, "white");
+    addPieceToSquare(squares[7][0], board[7][0], "♖");
+
+    board[7][1] = knightCreator.createPiece(1, 7, "white");
+    addPieceToSquare(squares[7][1], board[7][1], "♘");
+
+    board[7][2] = bishopCreator.createPiece(2, 7, "white");
+    addPieceToSquare(squares[7][2], board[7][2], "♗");
+
+    board[7][3] = queenCreator.createPiece(3, 7, "white");
+    addPieceToSquare(squares[7][3], board[7][3], "♕");
+
+    board[7][4] = kingCreator.createPiece(4, 7, "white");
+    addPieceToSquare(squares[7][4], board[7][4], "♔");
+
+    board[7][5] = bishopCreator.createPiece(5, 7, "white");
+    addPieceToSquare(squares[7][5], board[7][5], "♗");
+
+    board[7][6] = knightCreator.createPiece(6, 7, "white");
+    addPieceToSquare(squares[7][6], board[7][6], "♘");
+
+    board[7][7] = rookCreator.createPiece(7, 7, "white");
+    addPieceToSquare(squares[7][7], board[7][7], "♖");
+}
+
+
 
     private void addPieceToSquare(JPanel square, Piece piece, String symbol) {
         JLabel pieceLabel = new JLabel(symbol, SwingConstants.CENTER);
